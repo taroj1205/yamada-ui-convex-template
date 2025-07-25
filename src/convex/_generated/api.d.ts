@@ -9,12 +9,15 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as crons from "../crons.js";
 import type * as functions_auth from "../functions/auth.js";
+import type * as functions_chartData from "../functions/chartData.js";
 import type * as functions_counter from "../functions/counter.js";
 import type * as functions_resendOTP from "../functions/resendOTP.js";
 import type * as healthCheck from "../healthCheck.js";
 import type * as http from "../http.js";
 import type * as sendEmails from "../sendEmails.js";
+import type * as tables_chartData from "../tables/chartData.js";
 import type * as tables_counter from "../tables/counter.js";
 import type * as tables_users from "../tables/users.js";
 
@@ -34,12 +37,15 @@ import type {
  */
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  crons: typeof crons;
   "functions/auth": typeof functions_auth;
+  "functions/chartData": typeof functions_chartData;
   "functions/counter": typeof functions_counter;
   "functions/resendOTP": typeof functions_resendOTP;
   healthCheck: typeof healthCheck;
   http: typeof http;
   sendEmails: typeof sendEmails;
+  "tables/chartData": typeof tables_chartData;
   "tables/counter": typeof tables_counter;
   "tables/users": typeof tables_users;
 }>;
