@@ -24,3 +24,8 @@ pre-commit:
       glob: "*.{ts,tsx,js,jsx,cjs,mjs,json,md,mdx,css,scss,yaml,yml}"
       run: |
         bun cspell {staged_files} --cache --cache-strategy=content --cache-location=.cspellcache
+    secretlint:
+      glob: "*"
+      run: |
+        npx secretlint --maskSecrets {staged_files}
+      stage_fixed: true
