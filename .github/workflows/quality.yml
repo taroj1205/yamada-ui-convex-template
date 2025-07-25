@@ -73,6 +73,9 @@ jobs:
         with:
           bun-version: latest
 
+      - name: Install dependencies (Bun)
+        run: bun install --frozen-lockfile --ignore-scripts
+
       - name: Run SecretLint
         run: bunx secretlint "**/*"
 
@@ -109,7 +112,7 @@ jobs:
             nextjs-${{ runner.os }}-
 
       - name: Install dependencies (Bun)
-        run: bun install --frozen-lockfile
+        run: bun install --frozen-lockfile --ignore-scripts
 
       - name: Build (Next.js)
         run: bunx next build 
