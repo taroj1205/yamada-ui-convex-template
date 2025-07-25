@@ -9,15 +9,18 @@ export const listNumbers = query({
   },
 
   handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("User not authenticated");
+    }
+
     const numbers = await ctx.db
       .query("counter")
       .order("desc")
       .filter((q) => q.eq(q.field("userId"), userId))
       .take(args.count);
-    const userId = await getAuthUserId(ctx);
-    const user = userId === null ? null : await ctx.db.get(userId);
+
     return {
-      user: user ?? null,
       numbers: numbers.map((number) => number.value) ?? [],
     };
   },
