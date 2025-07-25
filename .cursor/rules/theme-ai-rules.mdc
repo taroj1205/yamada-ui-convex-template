@@ -1,0 +1,177 @@
+---
+globs: **/*.tsx
+alwaysApply: false
+---
+
+# Yamada UI Theme System: AI Rules
+
+## Overview
+
+The `~/theme` directory defines the design system for the project using Yamada UI. It provides a strongly-typed, token-based theming system and component style overrides for all UI primitives and custom components.
+
+### Directory Structure
+
+- `~/theme/tokens/`: Design tokens (colors, spacing, radii, font sizes, etc.) as TypeScript objects.
+- `~/theme/components/`: Component style overrides and custom component style definitions, using Yamada UI's `ComponentStyle` or `ComponentMultiStyle` types.
+- `~/theme/config.ts`: Theme configuration (color mode, breakpoints, etc.).
+- `~/theme/semantics.ts`: Semantic color and space mappings (e.g., `primary`, `danger`, `muted`).
+- `~/theme/styles/`: Global, layer, reset, and text styles.
+- `~/theme/index.ts`: Exports the assembled theme object for use in the app.
+
+## Semantic Tokens
+
+- Tokens are the atomic values for design (e.g., `colors`, `spaces`, `fontSizes`, `radii`).
+- Each token is a TypeScript object, e.g.:
+  ```ts
+  export const colors = { primary: "#4387f4", ... }
+  export const radii = { md: "0.375rem", ... }
+  ```
+- Tokens are imported and merged in `~/theme/tokens/index.ts` and then included in the main theme export.
+
+## Component Styles
+
+- Each file in `~/theme/components/` exports a style object for a component, e.g.:
+  ```ts
+  export const Button: ComponentStyle<"Button"> = { ... }
+  ```
+- Use `ComponentStyle` for single-part components, `ComponentMultiStyle` for multi-part (composite) components.
+- Variants, sizes, and defaultProps are defined per component.
+- To extend a component, use `mergeStyle` or `mergeMultiStyle`.
+- **Do not override or reapply styles that are already part of Yamada UI's default styles. Only extend or customize styles when necessary for your project.**
+
+## Semantics
+
+- `~/theme/semantics.ts` maps semantic names (e.g., `primary`, `danger`, `muted`) to actual token values.
+- Use semantic names in component styles for maintainability and easy theme switching.
+
+## Using Yamada UI Components
+
+- Import components from `@yamada-ui/react` and use them in JSX:
+
+  ```tsx
+  import { VStack, Button, Text } from "@yamada-ui/react";
+
+  export function Example() {
+    return (
+      <VStack gap="md">
+        <Text fontSize="lg">Hello World</Text>
+        <Button colorScheme="primary" variant="solid">
+          Click me
+        </Button>
+      </VStack>
+    );
+  }
+  ```
+
+- All props are typed and support theme tokens and semantic values.
+- Use `colorScheme`, `variant`, and `size` props to control appearance.
+- Layout primitives like `<VStack>`, `<HStack>`, `<Box>`, etc., are used for spacing and alignment.
+
+## Best Practices
+
+- Prefer semantic tokens over raw values for colors, spacing, etc.
+- Extend or override component styles in `~/theme/components/` only when project-wide changes are needed.
+- Use the exported `defaultTheme` from `~/theme/index.ts` as the theme provider value.
+- When adding new tokens or components, follow the existing file and export conventions.
+- **Avoid aggressive style overrides. If a style is already provided by Yamada UI's default, do not redefine it unless you need to change the default behavior.**
+
+## Example: Adding a Custom Component Style
+
+To add a custom style for a new component:
+
+1. Create a file in `~/theme/components/` (e.g., `my-component.ts`).
+2. Export a `ComponentStyle` or `ComponentMultiStyle` object.
+3. Add it to `components` in `~/theme/components/index.ts`.
+4. Use the component in your app, and the style will be applied automatically.
+
+---
+
+**For AI models:**
+
+- When generating code, always use semantic tokens and component styles as defined in `~/theme`.
+- When suggesting UI code, prefer Yamada UI primitives and follow the theme's conventions.
+- When documenting or refactoring, explain how the theme and component styles are used and extended.
+- **Do not override or reapply styles that are already part of Yamada UI's default styles. Only extend or customize when necessary.**
+
+## Layer Styles and Text Styles
+
+- `~/theme/styles/layer-styles.ts` and `~/theme/styles/text-styles.ts` allow you to define reusable style objects for layout and text, respectively.
+- These styles can be referenced in any Yamada UI component via the `layerStyle` or `textStyle` prop.
+- This enables consistent, DRY styling across your app, and leverages the theme’s token system.
+
+### Defining Layer Styles
+
+- In `~/theme/styles/layer-styles.ts`, export a `layerStyles` object of type `LayerStyles`.
+- Each key is a style name, and the value is a style object using theme tokens and semantic values.
+
+Example:
+
+```ts
+import type { LayerStyles } from "@yamada-ui/react";
+
+export const layerStyles: LayerStyles = {
+  card: {
+    bg: "background",
+    borderRadius: "md",
+    boxShadow: "md",
+    p: "lg",
+  },
+  // Add more styles as needed
+};
+```
+
+### Defining Text Styles
+
+- In `~/theme/styles/text-styles.ts`, export a `textStyles` object of type `TextStyles`.
+- Each key is a style name, and the value is a text style object.
+
+Example:
+
+```ts
+import type { TextStyles } from "@yamada-ui/react";
+
+export const textStyles: TextStyles = {
+  heading: {
+    fontSize: "2xl",
+    fontWeight: "bold",
+    lineHeight: "shorter",
+  },
+  subtitle: {
+    fontSize: "lg",
+    color: "muted",
+  },
+  // Add more styles as needed
+};
+```
+
+### Using Layer and Text Styles in Components
+
+- Pass the style name to the `layerStyle` or `textStyle` prop on any Yamada UI component.
+- The component will automatically apply all the styles defined for that key.
+
+Example:
+
+```tsx
+import { Box, Text } from "@yamada-ui/react";
+
+export function ExampleCard() {
+  return (
+    <Box layerStyle="card">
+      <Text textStyle="heading">Card Title</Text>
+      <Text textStyle="subtitle">Card subtitle goes here.</Text>
+    </Box>
+  );
+}
+```
+
+- This approach ensures that your UI is consistent and easy to update—change the style in one place, and it updates everywhere it’s used.
+
+### Best Practices
+
+- Use semantic names for your styles (e.g., `card`, `heading`, `subtitle`).
+- Reference theme tokens and semantic values for maximum flexibility.
+- Only define styles you actually use in your app.
+
+- When suggesting UI code, prefer Yamada UI primitives and follow the theme's conventions.
+- When documenting or refactoring, explain how the theme and component styles are used and extended.
+- **Do not override or reapply styles that are already part of Yamada UI's default styles. Only extend or customize when necessary.**
