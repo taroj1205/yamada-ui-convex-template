@@ -79,6 +79,26 @@ jobs:
       - name: Run SecretLint
         run: bunx secretlint "**/*"
 
+  typescript:
+    name: TypeScript
+    needs: [check_changes]
+    if: ${{ needs.check_changes.outputs.changed == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install dependencies (Bun)
+        run: bun install --frozen-lockfile --ignore-scripts
+
+      - name: Type Check
+        run: bunx tsc --noEmit
+
   build:
     name: Build (Next.js)
     needs: [biome, cspell, secretlint]
@@ -119,7 +139,7 @@ jobs:
 
   verify:
     name: Verify
-    needs: [check_changes, build]
+    needs: [check_changes, build, typescript]
     runs-on: ubuntu-latest
     if: |
       always() &&
