@@ -20,6 +20,7 @@ import {
   useNotice,
   VStack,
 } from "@yamada-ui/react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { otpSignInFormSchema } from "~/schemas/auth";
@@ -34,6 +35,7 @@ export function SignInForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [step, setStep] = useState<"email" | "otp">("email");
   const [otpError, setOtpError] = useState("");
+  const router = useRouter();
 
   const form = useForm<OtpSignInFormData>({
     resolver: zodResolver(otpSignInFormSchema),
@@ -68,7 +70,8 @@ export function SignInForm() {
     setIsSubmitting(true);
     setOtpError("");
     try {
-      await signIn("resend-otp", { email, code: otpValue, redirectTo: "/" });
+      await signIn("resend-otp", { email, code: otpValue });
+      router.push("/");
     } catch (err) {
       setOtpError((err as Error).message);
       notice({

@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 export const Header = () => {
   const router = useRouter();
   const { signOut } = useAuthActions();
+
   return (
     <Box
       alignItems="center"

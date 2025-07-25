@@ -1,4 +1,21 @@
 services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: convex
+      POSTGRES_PASSWORD: convexpassword
+      POSTGRES_DB: convex_self_hosted
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U convex"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   backend:
     image: ghcr.io/get-convex/convex-backend:6efab6f2b6c182b90255774d747328cfc7b80dd9
     stop_grace_period: 10s
@@ -18,8 +35,8 @@ services:
       - DATABASE_URL=${DATABASE_URL:-}
       - DISABLE_BEACON=${DISABLE_BEACON:-}
       - REDACT_LOGS_TO_CLIENT=${REDACT_LOGS_TO_CLIENT:-}
-      - DO_NOT_REQUIRE_SSL=${DO_NOT_REQUIRE_SSL:-}
-      - POSTGRES_URL=${POSTGRES_URL:-}
+      - DO_NOT_REQUIRE_SSL=${DO_NOT_REQUIRE_SSL:-true}
+      - POSTGRES_URL=${POSTGRES_URL:-postgresql://convex:convexpassword@postgres:5432}
       - MYSQL_URL=${MYSQL_URL:-}
       - RUST_LOG=${RUST_LOG:-info}
       - RUST_BACKTRACE=${RUST_BACKTRACE:-}
@@ -33,6 +50,9 @@ services:
       - S3_STORAGE_FILES_BUCKET=${S3_STORAGE_FILES_BUCKET:-}
       - S3_STORAGE_SEARCH_BUCKET=${S3_STORAGE_SEARCH_BUCKET:-}
       - S3_ENDPOINT_URL=${S3_ENDPOINT_URL:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
 
     healthcheck:
       test: curl -f http://localhost:3210/version
@@ -50,6 +70,9 @@ services:
     depends_on:
       backend:
         condition: service_healthy
+      postgres:
+        condition: service_healthy
 
 volumes:
   data:
+  pgdata:
