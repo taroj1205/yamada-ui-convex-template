@@ -1,21 +1,23 @@
 "use client";
 
+import { useAuthActions } from "@convex-dev/auth/react";
 import { Box, Button, HStack, Loading, Text } from "@yamada-ui/react";
 import { Authenticated, AuthLoading, Unauthenticated } from "convex/react";
 import NextLink from "next/link";
 import { useRouter } from "next/navigation";
-import { authClient } from "~/lib/auth/client";
 
 export const Header = () => {
   const router = useRouter();
+  const { signOut } = useAuthActions();
   return (
     <Box
       alignItems="center"
       as="header"
       bg="background"
-      borderBottomColor={{ base: "slate.200", _dark: "slate.800" }}
+      borderBottomColor={["slate.200", "slate.800"]}
       borderBottomWidth="2px"
       display="flex"
+      h="12"
       justifyContent="space-between"
       pos="sticky"
       px="4"
@@ -33,7 +35,7 @@ export const Header = () => {
       >
         Convex + Next.js + Convex Auth
       </Text>
-      <HStack gap="4">
+      <HStack>
         <AuthLoading>
           <Loading />
         </AuthLoading>
@@ -46,7 +48,7 @@ export const Header = () => {
           <Button
             colorScheme="gray"
             onClick={() => {
-              authClient.signOut().then(() => {
+              signOut().then(() => {
                 router.push("/signin");
               });
             }}

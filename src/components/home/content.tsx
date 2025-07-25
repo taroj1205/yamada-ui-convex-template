@@ -1,28 +1,37 @@
 "use client";
 
+import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   Box,
   Button,
   Code,
   Container,
-  Divider,
   HStack,
   Link,
+  Separator,
   Text,
   VStack,
 } from "@yamada-ui/react";
-import { useMutation, useQuery } from "convex/react";
 import { ResourceCard } from "~/components/common/resource-card";
 import { api } from "~/convex/_generated/api";
 
 export const Content = () => {
-  const { viewer, numbers } =
-    useQuery(api.myFunctions.listNumbers, {
+  const { data } = useQuery(
+    convexQuery(api.functions.counter.listNumbers, {
       count: 10,
-    }) ?? {};
-  const addNumber = useMutation(api.myFunctions.addNumber);
+    })
+  );
+  const numbers = data?.numbers ?? [];
+  const { mutate: addNumber, error: addNumberError } = useMutation({
+    mutationFn: useConvexMutation(api.functions.counter.addNumber),
+  });
 
-  if (viewer === undefined || numbers === undefined) {
+  const { data: session, isPending } = useQuery(
+    convexQuery(api.functions.auth.currentUser, {})
+  );
+
+  if (isPending || numbers === undefined) {
     return (
       <Box mx="auto">
         <Text>loading... (consider a loading skeleton)</Text>
@@ -32,7 +41,7 @@ export const Content = () => {
 
   return (
     <Container centerContent>
-      <Text>Welcome {viewer ?? "Anonymous"}!</Text>
+      <Text>Welcome {session?.name ?? "Anonymous"}!</Text>
       <Text>
         Click the button below and open this page in another window - this data
         is persisted in the Convex cloud database!
@@ -54,6 +63,11 @@ export const Content = () => {
           ? "Click the button!"
           : (numbers?.join(", ") ?? "...")}
       </Text>
+      {addNumberError && (
+        <Text color={["danger.500", "danger.400"]}>
+          Error: {addNumberError.message}
+        </Text>
+      )}
       <Text>
         Edit <Code fontWeight="bold">convex/myFunctions.ts</Code> to change your
         backend
@@ -68,7 +82,7 @@ export const Content = () => {
         </Link>{" "}
         for an example of loading data in a server component
       </Text>
-      <Divider />
+      <Separator />
       <VStack>
         <Text fontSize="lg" fontWeight="bold">
           Useful resources:

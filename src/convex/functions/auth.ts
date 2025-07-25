@@ -1,58 +1,24 @@
-import {
-  type AuthFunctions,
-  BetterAuth,
-  type PublicAuthFunctions,
-} from "@convex-dev/better-auth";
-import { api, components, internal } from "../_generated/api";
-import type { DataModel, Id } from "../_generated/dataModel";
+import { getAuthSessionId, getAuthUserId } from "@convex-dev/auth/server";
 import { query } from "../_generated/server";
 
-const authFunctions: AuthFunctions = internal.functions.auth;
-const publicAuthFunctions: PublicAuthFunctions = api.auth;
-
-// Initialize the component
-export const betterAuthComponent = new BetterAuth(components.betterAuth, {
-  authFunctions,
-  publicAuthFunctions,
-});
-
-// These are required named exports
-export const {
-  createUser,
-  updateUser,
-  deleteUser,
-  createSession,
-  isAuthenticated,
-} = betterAuthComponent.createAuthFunctions<DataModel>({
-  // Must create a user and return the user id
-  onCreateUser: async (ctx, user) => {
-    return await ctx.db.insert("users", {
-      ...user,
-    });
-  },
-
-  // Delete the user when they are deleted from Better Auth
-  onDeleteUser: async (ctx, userId) => {
-    await ctx.db.delete(userId as Id<"users">);
-  },
-});
-
-// Example function for getting the current user
-// Feel free to edit, omit, etc.
-export const getCurrentUser = query({
+export const currentUser = query({
   args: {},
   handler: async (ctx) => {
-    // Get user data from Better Auth - email, name, image, etc.
-    const userMetadata = await betterAuthComponent.getAuthUser(ctx);
-    if (!userMetadata) {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) {
       return null;
     }
-    // Get user data from your application's database
-    // (skip this if you have no fields in your users table schema)
-    const user = await ctx.db.get(userMetadata.userId as Id<"users">);
-    return {
-      ...user,
-      ...userMetadata,
-    };
+    return await ctx.db.get(userId);
+  },
+});
+
+export const currentSession = query({
+  args: {},
+  handler: async (ctx) => {
+    const sessionId = await getAuthSessionId(ctx);
+    if (sessionId === null) {
+      return null;
+    }
+    return await ctx.db.get(sessionId);
   },
 });

@@ -32,6 +32,6 @@ export const globalStyle: UIStyle = {
   main: {
     alignItems: "center",
     minH: { base: "3xl", lg: "lg" },
-    my: { base: "0", lg: "md" },
+    my: "md",
   },
 };

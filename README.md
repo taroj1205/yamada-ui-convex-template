@@ -18,6 +18,16 @@ bun install
 bun run dev
 ```
 
+> **First time setup:**
+>
+> Before running the app for the first time, you need to set a secret for authentication:
+>
+> ```sh
+> npx convex env set BETTER_AUTH_SECRET=$(openssl rand -base64 32)
+> ```
+>
+> This command generates a secure random secret and sets it in your Convex environment. You only need to do this once per project.
+
 ## Learn more
 
 To learn more about developing your project with Convex, check out:

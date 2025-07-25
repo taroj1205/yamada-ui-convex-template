@@ -7,14 +7,14 @@ export const metadata: Metadata = {
   description: "Sign in to your account",
 };
 
-const AuthForm = dynamic(() =>
-  import("~/components/auth").then((m) => m.AuthForm)
+const SignInForm = dynamic(() =>
+  import("~/components/auth").then((m) => m.SignInForm)
 );
 
 export default function SignInPage() {
   return (
     <VStack as="main">
-      <AuthForm />
+      <SignInForm />
     </VStack>
   );
 }

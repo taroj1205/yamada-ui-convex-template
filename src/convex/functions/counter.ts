@@ -1,7 +1,7 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { v } from "convex/values";
-import { api } from "./_generated/api";
-import { action, mutation, query } from "./_generated/server";
+import { api } from "~/convex/_generated/api";
+import { action, mutation, query } from "~/convex/_generated/server";
 
 // Write your Convex functions in any file inside this directory (`convex`).
 // See https://docs.convex.dev/functions for more.
@@ -18,15 +18,15 @@ export const listNumbers = query({
     //// Read the database as many times as you need here.
     //// See https://docs.convex.dev/database/reading-data.
     const numbers = await ctx.db
-      .query("numbers")
+      .query("counter")
       // Ordered by _creationTime, return most recent
       .order("desc")
       .take(args.count);
     const userId = await getAuthUserId(ctx);
     const user = userId === null ? null : await ctx.db.get(userId);
     return {
-      viewer: user?.email ?? null,
-      numbers: numbers.reverse().map((number) => number.value),
+      user: user ?? null,
+      numbers: numbers.reverse().map((number) => number.value) ?? [],
     };
   },
 });
@@ -40,13 +40,16 @@ export const addNumber = mutation({
 
   // Mutation implementation.
   handler: async (ctx, args) => {
-    //// Insert or modify documents in the database here.
-    //// Mutations can also read from the database like queries.
-    //// See https://docs.convex.dev/database/writing-data.
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("User not authenticated");
+    }
 
-    const _id = await ctx.db.insert("numbers", { value: args.value });
-    // Optionally, return a value from your mutation.
-    // return id;
+    const counter = await ctx.db.insert("counter", {
+      value: args.value,
+      userId,
+    });
+    return counter;
   },
 });
 
@@ -66,12 +69,12 @@ export const myAction = action({
     // const data = await response.json();
 
     //// Query data by running Convex queries.
-    const _data = await ctx.runQuery(api.myFunctions.listNumbers, {
+    const _data = await ctx.runQuery(api.functions.counter.listNumbers, {
       count: 10,
     });
 
     //// Write data by running Convex mutations.
-    await ctx.runMutation(api.myFunctions.addNumber, {
+    await ctx.runMutation(api.functions.counter.addNumber, {
       value: args.first,
     });
   },
