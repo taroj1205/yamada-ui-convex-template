@@ -7,10 +7,10 @@ import { api } from "~/convex/_generated/api";
 export default function Home({
   preloaded,
 }: {
-  preloaded: Preloaded<typeof api.myFunctions.listNumbers>;
+  preloaded: Preloaded<typeof api.functions.counter.listNumbers>;
 }) {
   const data = usePreloadedQuery(preloaded);
-  const addNumber = useMutation(api.myFunctions.addNumber);
+  const addNumber = useMutation(api.functions.counter.addNumber);
   return (
     <Container centerContent>
       <Heading as="h2" size="xl">

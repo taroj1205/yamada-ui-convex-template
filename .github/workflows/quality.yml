@@ -1,0 +1,155 @@
+name: Quality Check
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  check_changes:
+    name: Check Changes
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      changed: ${{ steps.filter.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Filter Changed Files
+        id: filter
+        uses: taroj1205/check-changes@v1
+        with:
+          include: '**/*'
+          exclude: |
+            **/*.md
+            .gitignore
+            .gitattributes
+            .vscode/**/*
+          summary: true
+
+      - name: Debug Changed Files
+        run: |
+          echo "Changed File Count: ${{ steps.filter.outputs.changes_count }}"
+          echo "Changed: ${{ steps.filter.outputs.changed }}"
+          echo "Changed Files: ${{ steps.filter.outputs.changed_files }}"
+
+  biome:
+    name: Biome
+    needs: [check_changes]
+    if: ${{ needs.check_changes.outputs.changed == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Biome
+        uses: biomejs/setup-biome@v2
+
+      - name: Run Biome
+        run: biome ci . --error-on-warnings
+
+  cspell:
+    name: Spell Check
+    needs: [check_changes]
+    if: ${{ needs.check_changes.outputs.changed == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: streetsidesoftware/cspell-action@v7
+
+  secretlint:
+    name: SecretLint
+    needs: [check_changes]
+    if: ${{ needs.check_changes.outputs.changed == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install dependencies (Bun)
+        run: bun install --frozen-lockfile --ignore-scripts
+
+      - name: Run SecretLint
+        run: bunx secretlint "**/*"
+
+  typescript:
+    name: TypeScript
+    needs: [check_changes]
+    if: ${{ needs.check_changes.outputs.changed == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install dependencies (Bun)
+        run: bun install --frozen-lockfile --ignore-scripts
+
+      - name: Type Check
+        run: bunx tsc --noEmit
+
+  build:
+    name: Build (Next.js)
+    needs: [biome, cspell, secretlint]
+    if: ${{ needs.check_changes.outputs.changed == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/install/cache
+            .bun
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            bun-${{ runner.os }}-
+
+      - name: Cache Next.js build
+        uses: actions/cache@v4
+        with:
+          path: .next/cache
+          key: nextjs-${{ runner.os }}-${{ hashFiles('**/package.json', '**/bun.lock') }}
+          restore-keys: |
+            nextjs-${{ runner.os }}-
+
+      - name: Install dependencies (Bun)
+        run: bun install --frozen-lockfile --ignore-scripts
+
+      - name: Build (Next.js)
+        run: bunx next build 
+
+  verify:
+    name: Verify
+    needs: [check_changes, build, typescript]
+    runs-on: ubuntu-latest
+    if: |
+      always() &&
+      (
+        needs.check_changes.outputs.changed == 'false' ||
+        (
+          needs.check_changes.outputs.changed == 'true' &&
+          needs.build.result == 'success'
+        )
+      )
+    steps:
+      - name: Success
+        run: echo "All quality checks passed or no relevant files changed."
