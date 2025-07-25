@@ -12,6 +12,7 @@ export const listNumbers = query({
     const numbers = await ctx.db
       .query("counter")
       .order("desc")
+      .filter((q) => q.eq(q.field("userId"), userId))
       .take(args.count);
     const userId = await getAuthUserId(ctx);
     const user = userId === null ? null : await ctx.db.get(userId);
