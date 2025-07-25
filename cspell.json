@@ -64,6 +64,9 @@
     "vegeta",
     "xlink",
     "yamcha",
-    "zarbon"
+    "zarbon",
+    "convexpassword",
+    "pgdata",
+    "isready"
   ]
 }
