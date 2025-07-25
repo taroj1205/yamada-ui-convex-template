@@ -3,33 +3,45 @@
 declare namespace NodeJS {
   interface ProcessEnv {
     /**
-     * Convex deployment name, e.g. "convex:your-convex-db"
-     */
-    CONVEX_DEPLOYMENT: string;
-    /**
      * Convex URL for client-side usage
-     * Example: "http://127.0.0.1:3210"
+     * Example: "http://localhost:3210"
      */
     NEXT_PUBLIC_CONVEX_URL: string;
+
     /**
-     * Auth provider URL for client-side usage
-     * Example: "https://auth.example.com"
+     * Indicates if the setup script has run
+     * Example: "0"
      */
-    NEXT_PUBLIC_AUTH_URL: string;
-    /**
-     * Convex site URL for client-side usage
-     * Example: "https://your-convex-deployment.site"
-     */
-    SITE_URL: string;
-    /**
-     * Resend from email domain
-     * Example: "your-resend-from-email-domain.com"
-     */
-    AUTH_RESEND_FROM_EMAIL_DOMAIN: string;
+    SETUP_SCRIPT_RAN: string;
+
     /**
      * Resend API key
-     * Example: "your-resend-key"
+     * Example: "your-resend"
      */
     AUTH_RESEND_KEY: string;
+
+    /**
+     * Resend from email domain
+     * Example: "example.com"
+     */
+    AUTH_RESEND_FROM_EMAIL_DOMAIN: string;
+
+    /**
+     * Convex self-hosted admin key
+     * Example: "your-admin-key"
+     */
+    CONVEX_SELF_HOSTED_ADMIN_KEY: string;
+
+    /**
+     * Convex self-hosted URL
+     * Example: "http://localhost:3210"
+     */
+    CONVEX_SELF_HOSTED_URL: string;
+
+    /**
+     * Convex site URL
+     * Example: "https://your-convex-deployment.site"
+     */
+    CONVEX_SITE_URL: string;
   }
 }
