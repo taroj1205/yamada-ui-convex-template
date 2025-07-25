@@ -113,3 +113,20 @@ jobs:
 
       - name: Build (Next.js)
         run: bunx next build 
+
+  verify:
+    name: Verify
+    needs: [check_changes, build]
+    runs-on: ubuntu-latest
+    if: |
+      always() &&
+      (
+        needs.check_changes.outputs.changed == 'false' ||
+        (
+          needs.check_changes.outputs.changed == 'true' &&
+          needs.build.result == 'success'
+        )
+      )
+    steps:
+      - name: Success
+        run: echo "All quality checks passed or no relevant files changed."
