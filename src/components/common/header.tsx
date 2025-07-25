@@ -40,7 +40,13 @@ export const Header = () => {
           <Loading />
         </AuthLoading>
         <Unauthenticated>
-          <Button as={NextLink} href="/signin">
+          <Button
+            as={NextLink}
+            href="/signin"
+            size="sm"
+            type="button"
+            variant="subtle"
+          >
             Sign In
           </Button>
         </Unauthenticated>
