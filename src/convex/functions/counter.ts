@@ -17,7 +17,7 @@ export const listNumbers = query({
     const user = userId === null ? null : await ctx.db.get(userId);
     return {
       user: user ?? null,
-      numbers: numbers.reverse().map((number) => number.value) ?? [],
+      numbers: numbers.map((number) => number.value) ?? [],
     };
   },
 });
